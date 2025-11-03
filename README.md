@@ -58,7 +58,7 @@ Antwort:
     "frequency": 5
   }
 ]
-
+```
 ---
 
 ## Projektstruktur
