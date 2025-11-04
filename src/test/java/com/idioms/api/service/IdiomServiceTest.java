@@ -9,6 +9,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Integration tests for IdiomService.
+ * Verifies repository interaction and basic business logic.
+ */
 @SpringBootTest
 class IdiomServiceTest {
 
@@ -17,30 +21,31 @@ class IdiomServiceTest {
 
     @Test
     void randomIdioms_shouldReturnOnlyGivenFrequency() {
-        // Arrange: Testparameter
+        // Arrange – test parameters
         int frequency = 5;
         int count = 3;
 
-        // Act: Methode aufrufen
+        // Act – execute service method
         List<Idiom> idioms = idiomService.findRandomIdioms(frequency, count);
 
-        // Assert: Prüfen, ob die Ergebnisse korrekt sind
-        assertNotNull(idioms, "Liste darf nicht null sein");
-        assertFalse(idioms.isEmpty(), "Liste darf nicht leer sein");
-        assertTrue(idioms.size() <= count, "Liste darf nicht mehr als 'count' Elemente enthalten");
+        // Assert – validate result
+        assertNotNull(idioms, "Result list must not be null");
+        assertFalse(idioms.isEmpty(), "Result list should not be empty");
+        assertTrue(idioms.size() <= count, "Result list should not exceed the requested count");
         assertTrue(idioms.stream().allMatch(i -> i.getFrequency() == frequency),
-                "Alle Idioms müssen die gewünschte Frequency haben");
+                "All idioms must match the requested frequency");
     }
 
     @Test
     void randomIdioms_shouldHandleInvalidFrequency() {
-        // Frequenz, die evtl. nicht existiert
+        // Arrange – use a frequency that might not exist
         int invalidFrequency = 0;
         int count = 5;
 
+        // Act
         List<Idiom> idioms = idiomService.findRandomIdioms(invalidFrequency, count);
 
-        // sollte einfach leer zurückgeben, kein Fehler
-        assertNotNull(idioms);
+        // Assert – should not throw, just return an empty list
+        assertNotNull(idioms, "Service should never return null");
     }
 }
