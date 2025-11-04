@@ -6,6 +6,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service layer that handles business logic for Idioms.
+ * Delegates data operations to the repository and performs input validation.
+ */
 @Service
 public class IdiomService {
 
@@ -15,17 +19,23 @@ public class IdiomService {
         this.idiomRepo = idiomRepo;
     }
 
+    /**
+     * Returns a list of random idioms filtered by frequency.
+     */
     public List<Idiom> findRandomIdioms(int frequency, int count) {
         return idiomRepo.randomIdioms(frequency, count);
     }
 
+    /**
+     * Searches idioms by keyword (text, meaning, or example).
+     * Throws an IllegalArgumentException if the query is null or too short.
+     */
     public List<Idiom> searchIdioms(String query) {
         if (query == null || query.trim().length() < 3) {
-            throw new IllegalArgumentException("Suchbegriff zu kurz (min. 3 Zeichen).");
+            throw new IllegalArgumentException("Search term too short (min. 3 characters).");
         }
 
         String cleanQuery = query.trim();
         return idiomRepo.search(cleanQuery);
     }
 }
-
