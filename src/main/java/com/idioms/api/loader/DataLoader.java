@@ -16,34 +16,36 @@ public class DataLoader implements CommandLineRunner {
 
     private final IdiomRepository idiomRepository;
 
-    public DataLoader(IdiomRepository idiomRepository){
-        this.idiomRepository=idiomRepository;
+    public DataLoader(IdiomRepository idiomRepository) {
+        this.idiomRepository = idiomRepository;
     }
 
     @Override
-    public void run(String ... args){
+    public void run(String... args) {
         if (idiomRepository.count() == 0) {
-            readFile();
-            System.out.println("Idioms importiert (erste Initialisierung).");
+            importIdioms();
+            System.out.println("Idioms imported successfully (initial setup).");
         } else {
-            System.out.println("Datenbank bereits befüllt – kein Import nötig.");
+            System.out.println("Database already populated — skipping import.");
         }
     }
 
-    public void readFile() {
+    /**
+     * Reads the idioms CSV file and saves each entry to the database.
+     */
+    private void importIdioms() {
         List<String[]> allLines;
-        try{
-            try (Stream<String> lines = Files.lines(Path.of("src/main/resources/data/idioms.csv"))) {
-                allLines = lines
-                        .filter(line -> !line.isBlank())
-                        .map(line -> line.split("(?<=[^\\s]),(?=[^\\s])", -1)) // behält leere Felder
-                        .filter(cols -> cols.length >= 4)
-                        .toList();
-            }
+        try (Stream<String> lines = Files.lines(Path.of("src/main/resources/data/idioms.csv"))) {
+            allLines = lines
+                    .filter(line -> !line.isBlank())
+                    .map(line -> line.split("(?<=[^\\s]),(?=[^\\s])", -1)) // keep empty columns
+                    .filter(cols -> cols.length >= 4)
+                    .toList();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to read idioms CSV file", e);
         }
-        for (String[] line : allLines){
+
+        for (String[] line : allLines) {
             Idiom idiom = new Idiom();
             idiom.setText(line[0]);
             idiom.setMeaning(line[1]);
@@ -53,14 +55,17 @@ public class DataLoader implements CommandLineRunner {
         }
     }
 
-    private int parseFrequency(String raw){
+    /**
+     * Cleans and converts the frequency field from the CSV into an integer value.
+     * If invalid, returns 0.
+     */
+    private int parseFrequency(String raw) {
         try {
             String cleaned = raw.replaceAll("[^0-9-]", "").trim();
             return cleaned.isEmpty() ? 0 : Integer.parseInt(cleaned);
         } catch (NumberFormatException e) {
-            System.err.println("Ungültige Frequenz: '" + raw + "', setze 0.");
+            System.err.println("Invalid frequency value: '" + raw + "', defaulting to 0.");
             return 0;
         }
     }
-
 }
